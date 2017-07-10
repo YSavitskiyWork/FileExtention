@@ -1,15 +1,23 @@
 {
   "manifest_version": 2,
-
+  "version": "0.1",
   "name": "FileExtension",
   "description": "This extention shows information about users files and folders.",
 
-  "path": "/Users/developer/Documents/GitHub/FileExtension/nmh/nmh",
-  "type": "stdio",
-  "allowed_originals": "",
-  
-  "browser_action": {
+  "browser_action": 
+  {
     "default_icon": "icon.png",
     "default_popup": "popup.html"
+  },
+
+  "permissions": 
+  [
+    "nativeMessaging"
+  ],
+
+  "background":
+  {
+    "scripts": ["eventPage.js"],
+    "persistent": false
   }
 }

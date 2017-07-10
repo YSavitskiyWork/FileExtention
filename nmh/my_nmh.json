@@ -1,0 +1,10 @@
+{
+    "name": "com.ys.my_nmh",
+    "description": "My nmh",
+    "path": "/Users/developer/Documents/GitHub/FileExtension/nmh/nmh.app",
+    "type": "stdio",
+    "allowed_origins":
+    [
+        "chrome-extension://khkimgiccepdhggagbpjenhhmmhecnpe/"
+    ]
+}

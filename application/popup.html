@@ -13,13 +13,14 @@
       -
       - [1]: https://developer.chrome.com/extensions/contentSecurityPolicy
      -->
-    <script src="popup.js"></script>
+    <script src="popup.js" async></script>
   </head>
   <body>
     <div>
       <label> Files or folders name</label>
-      <input type="text">
-      <label> Files size</label>
+      <input type="text" id="path">
+      <label > Files size </label>
+      <p id="size"></p>
     </div>
   </body>
 </html>
