@@ -14,14 +14,17 @@
       - [1]: https://developer.chrome.com/extensions/contentSecurityPolicy
      -->
     <script src="popup.js" async></script>
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" type="text/css" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
   </head>
   <body>
-    <div>
-      <label> Files or folders name</label>
-      <input type="text" id="path">
-      <label > Files size </label>
-      <ol id="size"></ol>
+
+    <!-- Simple Textfield -->
+    <div class="mdl-textfield mdl-js-textfield is-upgraded" data-upgrade=",MaterialTextfield">
+      <input class="mdl-textfield__input" type="text" id="path" placeholder="Folder or files">
+      <!--<label class="mdl-textfield__label" for="path">Text...</label>-->
     </div>
+    <ol id="size"></ol>
   </body>
 </html>
 

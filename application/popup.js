@@ -14,7 +14,7 @@ function appendMessage(msg_json)
 
       if (name != "")
       {
-        document.getElementById('size').innerHTML += "<li>" + value + "</li>";
+        document.getElementById('size').innerHTML += "<li class=\"mdl-list__item\">" + value + "</li>";
       }      
     });
 }
