@@ -9,7 +9,7 @@
 size_t get_length()
 {
     size_t length = 0;
-    auto f_log = std::ofstream("log.txt", std::ofstream::app);
+    //auto f_log = std::ofstream("log.txt", std::ofstream::app);
     for (size_t i = 0; i < 4; ++i)
     {
         auto buf = getchar();
@@ -23,7 +23,7 @@ size_t get_length()
     return length;
 }
 
-void get_path_from_json(std::string &msg)
+inline void get_path_from_json(std::string &msg)
 {
     auto str = msg.replace(msg.length() - 2, msg.length(), "");
     str = msg.replace(0, 9, "");
@@ -36,31 +36,67 @@ std::ifstream::pos_type get_file_size(const std::string &path)
     return in.tellg();
 }
 
-std::string get_file_message(const size_t &size)
+inline void in_json(std::string &msg)
 {
-    std::ostringstream sstream;
-    sstream << "{\"text\":\"" << size << "\"}";
-    return sstream.str();
+    msg = "{" + msg + "}";
 }
 
-std::string get_folder_message(const std::string &path)
+std::string get_message(const size_t &size)
+{
+    std::ostringstream msg;
+    msg << "\"text\":\"" << size << " bytes\"";
+    return msg.str();
+}
+
+std::string get_message(const std::string &name, const size_t &size, const int ind=-1)
+{
+    std::ostringstream msg;
+    if (ind < 0)
+        msg << "\"text\":\"" << name << " - " << size << " bytes\"";
+    else
+        msg << "\"text" << ind <<"\":\"" << name << " - " << size << " bytes\"";
+    return msg.str();
+}
+
+std::string get_message(const std::string &name, const std::string mean="folder", const int ind=-1)
+{
+    std::ostringstream msg;
+    if (ind < 0)
+        msg << "\"text\":\"" << name << " - " << mean << "\"";
+    else
+        msg << "\"text" << ind <<"\":\"" << name << " - " << mean << "\"";
+    return msg.str();
+}
+
+std::string get_folders_contains_message(const std::string &path)
 {
     DIR *pdir = NULL;
     pdir = opendir(path.c_str());
     struct dirent *pent = NULL;
-    while ((pent = readdir(pdir)))
+    std::ostringstream msg;
+    //while ((pent = readdir(pdir)))
+    pent = readdir(pdir);
+    for (size_t i = 0; pent != NULL; pent = readdir(pdir), ++i)
     {
         switch (pent->d_type)
         {
         case DT_REG:
-            break;
-        case DT_DIR:
+        {
+            msg << get_message(pent->d_name, get_file_size(path+"/"+std::string(pent->d_name)), i) << ",";
             break;
         }
+        case DT_DIR:
+        {
+            msg << get_message(pent->d_name, "folder", i) << ",";
+            break;
+        }
+        }
     }
+    
+    return msg.str().replace(msg.str().length()-1, msg.str().length(), "");
 }
 
-bool is_file(const std::string &path)
+inline bool is_file(const std::string &path)
 {
     DIR *pdir = NULL;
     pdir = opendir(path.c_str());
@@ -72,7 +108,7 @@ void recieve_send(std::shared_ptr<thread_safe_queue<std::string>> queue)
 {
     auto f_log = std::ofstream("log.txt", std::ofstream::app);
 
-    size_t message_number = 0;
+    size_t msg_numb = 0;
     while (true)
     {
         size_t length = get_length();
@@ -84,17 +120,29 @@ void recieve_send(std::shared_ptr<thread_safe_queue<std::string>> queue)
             break;
 
         auto json = new char[length];
+        
         std::cin.read(json, length);
         std::string json_str(json);
-        //std::string json_str = "{\"text\":\"/Users/developer/Documents/test.txt\"}";
+        delete[] json;
+
+        //костыль, который дает гарантию, что строка будет заданного размера.
+        //по каким-то причинам, периодчисеки в json записывается больше, чем length
+        json_str.replace(length, json_str.length(), "");
+
+        //проверка длины принятой строки
+        if(length != json_str.length())
+            {
+                f_log << "\nUNEQUETION\n";
+            }
+
+        //std::string json_str = "{\"text\":\"/Users/developer/Documents/GitHub/FileExtention/application/\"}";
 
         queue->push(json_str);
 
         if (f_log)
             f_log << "input : " << json_str << std::endl;
 
-        ++message_number;
-        delete[] json;
+        ++msg_numb;
 
         // output
 
@@ -102,23 +150,26 @@ void recieve_send(std::shared_ptr<thread_safe_queue<std::string>> queue)
 
         get_path_from_json(path);
 
-        std::string message = "";
+        std::string msg = "";
         int size = get_file_size(path);
         if (size > 0)
         {
             if (is_file(path))
-                message = get_file_message(size);
+                msg = get_message(size);
             else
-                message = get_folder_message(path);                        
+                msg = get_folders_contains_message(path);                        
         }
 
-        size_t len = message.length();
+        in_json(msg);
+
+        size_t len = msg.length();
 
         std::cout << char(len >> 0) << char(len >> 8) << char(len >> 16) << char(len >> 24);
-        std::cout << message << std::flush;
+        std::cout << msg << std::flush;
 
         if (f_log)
-            f_log << "sending : " << message << std::endl;
+            f_log << "sending : " << msg << std::endl;
+
     }
 
     if (f_log)

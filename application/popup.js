@@ -1,9 +1,22 @@
-function appendMessage(text)
+function appendMessage(msg_json)
 {
-    document.getElementById('size').innerHTML += text;
-    console.log(text)
-    var path = document.getElementById('path').value;
-    document.getElementById("size").value = text;
+    // document.getElementById('size').innerHTML += text;
+    // console.log(text)
+    // var path = document.getElementById('path').value;
+    document.getElementById("size").innerHTML = "";
+    JSON.parse(msg_json, function(name, value)
+    {
+      if(name == "text")
+      {
+        document.getElementById('size').innerHTML += value;
+        return;
+      }
+
+      if (name != "")
+      {
+        document.getElementById('size').innerHTML += "<li>" + value + "</li>";
+      }      
+    });
 }
 
 function sendNativeMessage() 
@@ -11,12 +24,13 @@ function sendNativeMessage()
   message = {"text": document.getElementById('path').value};
   console.log(message);
   port.postMessage(message);
-  appendMessage("Sent message: <b>" + JSON.stringify(message) + "</b>");
+  //appendMessage("Sent message: <b>" + JSON.stringify(message) + "</b>");
 }
 
 function onNativeMessage(message) 
 {
-  appendMessage("Received message: <b>" + JSON.stringify(message) + "</b>");
+  //appendMessage("Received message: <b>" + JSON.stringify(message) + "</b>");
+  appendMessage(JSON.stringify(message));
 }
 
 function onDisconnected() 
@@ -28,7 +42,7 @@ function onDisconnected()
 function connect() 
 {
     var hostName = "com.ys.my_nmh";
-    appendMessage("Connecting to native messaging host <b>" + hostName + "</b>")
+    //appendMessage("Connecting to native messaging host <b>" + hostName + "</b>")
     port = chrome.runtime.connectNative(hostName);
     port.onMessage.addListener(onNativeMessage);
     port.onDisconnect.addListener(onDisconnected);
