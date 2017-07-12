@@ -48,24 +48,28 @@ std::string get_message(const size_t &size)
     return msg.str();
 }
 
-std::string get_message(const std::string &name, const size_t &size, const int ind=-1)
+inline std::string get_json_pairs(const std::vector<std::pair<std::string, std::string>> &pairs)
 {
-    std::ostringstream msg;
-    if (ind < 0)
-        msg << "\"text\":\"" << name << " - " << size << " bytes\"";
-    else
-        msg << "\"text" << ind <<"\":\"" << name << " - " << size << " bytes\"";
-    return msg.str();
+    std::string msg = "";
+
+    std::for_each(pairs.begin(), pairs.end(), [&msg](const std::pair<std::string, std::string> &pair)
+    {
+        msg += "\"" + pair.first + "\":\"" + pair.second + "\",";
+    });
+
+    return msg.replace(msg.length() - 1, msg.length(), "");
 }
 
-std::string get_message(const std::string &name, const std::string mean="folder", const int ind=-1)
+std::string get_message(const std::string &name, const std::string mean, const int ind=-1)
 {
-    std::ostringstream msg;
-    if (ind < 0)
-        msg << "\"text\":\"" << name << " - " << mean << "\"";
-    else
-        msg << "\"text" << ind <<"\":\"" << name << " - " << mean << "\"";
-    return msg.str();
+    std::string msg = "";
+    std::vector<std::pair<std::string, std::string>> pairs;
+    pairs.push_back({ind == -1 ? "text" : "text"+std::to_string(ind), name});
+    pairs.push_back({ind == -1 ? "mean" : "mean"+std::to_string(ind), mean});
+
+    msg = get_json_pairs(pairs);
+
+    return msg;
 }
 
 std::string get_folders_contains_message(const std::string &path)
@@ -82,7 +86,8 @@ std::string get_folders_contains_message(const std::string &path)
         {
         case DT_REG:
         {
-            msg << get_message(pent->d_name, get_file_size(path+"/"+std::string(pent->d_name)), i) << ",";
+            std::string size = std::to_string(get_file_size(path+"/"+std::string(pent->d_name))) + " bytes";
+            msg << get_message(pent->d_name, size, i) << ",";
             break;
         }
         case DT_DIR:
@@ -112,6 +117,7 @@ void recieve_send(std::shared_ptr<thread_safe_queue<std::string>> queue)
     while (true)
     {
         size_t length = get_length();
+        //size_t length = 1;
 
         if (f_log)
             f_log << "length : " << length << std::endl;
