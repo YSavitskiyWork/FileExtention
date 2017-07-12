@@ -65,6 +65,11 @@ std::string proc_path(const std::string &path)
     return real_path;
 }
 
+inline bool is_hidden(std::string name)
+{
+    return name.length() >=2 && name[1] != '.' && name[0] == '.';
+}
+
 std::string get_folders_contains_message(const std::string &path_)
 {
     auto path = proc_path(path_);
@@ -81,17 +86,21 @@ std::string get_folders_contains_message(const std::string &path_)
     pent = readdir(pdir);
     for (size_t i = 0; pent != NULL; pent = readdir(pdir), ++i)
     {
+        std::string name(pent->d_name);
+        if(is_hidden(name))
+            continue;
+
         switch (pent->d_type)
         {
         case DT_REG:
         {
-            std::string size = std::to_string(get_file_size(path+"/"+std::string(pent->d_name))) + " bytes";
-            get_message(msg, pent->d_name, size, i);
+            std::string size = std::to_string(get_file_size(path+"/"+std::string(name))) + " bytes";
+            get_message(msg, name, size, i);
             break;
         }
         case DT_DIR:
         {
-            get_message(msg, pent->d_name, "folder", i);
+            get_message(msg, name, "folder", i);
             break;
         }
         }
