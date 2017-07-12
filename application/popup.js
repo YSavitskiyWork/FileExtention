@@ -9,16 +9,40 @@ function appendMessage(msg_json)
     let i = 0;
     JSON.parse(msg_json, function(name, value)
     {
+      if(name == "parent")
+      {
+        tr = document.createElement('tr');
+        tr.id = "size_tr_" + i;
+        tr.addEventListener('click', openFile);
+        i += 1;
+        var td = document.createElement('td');
+        td.appendChild(document.createTextNode("back"));
+        td.className = "mdl-data-table__cell--non-numeric";
+        tr.appendChild(td);
+
+        tbdy.appendChild(tr);
+      }
+      if(name == "file")
+      {
+        tr = document.createElement('tr');
+        tr.id = "size_tr_" + i;
+        i += 1;
+        var td = document.createElement('td');
+        td.appendChild(document.createTextNode(value));
+        td.className = "mdl-data-table__cell--non-numeric";
+        tr.appendChild(td);
+        tbdy.appendChild(tr);
+      }
       if(name == "path")
-        {
-          document.getElementById("path").value = value;
-        }
+      {
+        document.getElementById("path").value = value;
+      }
 
       if(name.includes("text"))
       {
         tr = document.createElement('tr');
         tr.id = "size_tr_" + i;
-        tr.addEventListener('click', changeDir);
+        tr.addEventListener('click', openFile);
         i += 1;
         var td = document.createElement('td');
         td.appendChild(document.createTextNode(value));
@@ -40,7 +64,7 @@ function appendMessage(msg_json)
     });
 }
 
-function changeDir(event)
+function openFile(event)
 {
     var tr_id = null;
     if(event.target.tagName.toLowerCase() == 'td')
@@ -53,9 +77,24 @@ function changeDir(event)
       }
     var el = document.getElementById(tr_id);
     var attr = el.cells[0].textContent;
-    var value = el.cells[1].textContent;
-    if (value == "folder")
+    
+    if(attr == "back")
+    {
+      var path = document.getElementById("path").value;
+      var arr = path.split("/");
+      path = "";
+      for(let i = 0; i<arr.length-1; i+=1)
+      {
+        path +="/" + arr[i];
+      }
+      document.getElementById("path").value = path;
+    }
+    else
+    {
+      var value = el.cells[1].textContent;
       document.getElementById("path").value += "/" + attr;
+    }
+
     sendNativeMessage();
 }
 
@@ -65,6 +104,7 @@ function sendNativeMessage()
   console.log(message);
   port.postMessage(message);
 }
+
 
 function onNativeMessage(message) 
 {
@@ -88,11 +128,6 @@ function connect()
 function documentEvents() 
 {    
   document.getElementById('path').addEventListener('change', sendNativeMessage);
-//   document.querySelector('body').addEventListener('click', function(event) {
-//   if (event.target.tagName.toLowerCase() === 'li') {
-//     // do your action on your 'li' or whatever it is you're listening for
-//   }
-// });
 
 };
 
@@ -101,27 +136,3 @@ var port = null;
 connect();
 
 document.addEventListener('DOMContentLoaded', documentEvents());
-
-
-
-
-// function getSize(port)
-// {
-//     var path = document.getElementById('path').value;
-//     document.getElementById("size").innerHTML = path;
-
-//     chrome.extension.sendRequest(path);
-// }
-
-// chrome.extension.onRequest.addListener(function(data, sender) {
-//     if (data.length > 0) {
-//         connect();
-//         sendNativeMessage(data);
-//     }
-// });
-
-// function documentEvents() 
-// {    
-//   document.getElementById('path').addEventListener('change', 
-//     function() {getSize()});
-// };

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <vector>
 #include "thread_safe_queue.h"
 #include <fstream>
 #include <sstream>
@@ -32,9 +33,41 @@ std::ifstream::pos_type get_file_size(const std::string &path)
     return in.tellg();
 }
 
-std::string get_message(const size_t &size)
+std::string get_message(const std::string &path, const size_t &size)
 {
-    json msg = {"text", size};
+    json msg;
+    json t;
+    auto parent = path;
+    while(parent.back() != '/')
+        parent.pop_back();
+
+    if(size > 1024)
+    {
+        t["parent"] = parent;
+        t["file"] = "File too big";
+        msg.push_back(t);
+        return msg.dump();
+    }
+    if(size == 0)
+    {
+        t["parent"] = parent;
+        t["file"] = "";
+        msg.push_back(t);
+        return msg.dump();
+    }
+
+    std::ifstream file(path);
+    std::vector<char> buf(size);
+
+    file.read(buf.data(), size);
+
+    std::string file_str(buf.data());
+    buf.erase(buf.begin());
+    
+    t["parent"] = parent;
+    t["file"] = file_str;
+    msg.push_back(t);
+
     return msg.dump();
 }
 
@@ -67,7 +100,7 @@ std::string proc_path(const std::string &path)
 
 inline bool is_hidden(std::string name)
 {
-    return name.length() >=2 && name[1] != '.' && name[0] == '.';
+    return ((name.length() >=2 && name[1] != '.' && name[0] == '.') || (name.length() == 1 && name[0] == '.'));
 }
 
 std::string get_folders_contains_message(const std::string &path_)
@@ -106,6 +139,7 @@ std::string get_folders_contains_message(const std::string &path_)
         }
     }
     
+    closedir(pdir);
     return msg.dump();
 }
 
@@ -113,18 +147,21 @@ inline bool is_file(const std::string &path)
 {
     DIR *pdir = NULL;
     pdir = opendir(path.c_str());
+    bool file = pdir == NULL ? true : false;
+    if(pdir)
+        closedir(pdir);
 
-    return pdir == NULL ? true : false;
+    return file;
 }
 
 std::string create_sending_message(std::string path)
 {
     std::string msg = "";
     int size = get_file_size(path);
-    if (size > 0)
+    if (size >= 0)
     {
         if (is_file(path))
-            msg = get_message(size);
+            msg = get_message(path, size);
         else
             msg = get_folders_contains_message(path);                        
     }
@@ -154,15 +191,14 @@ size_t receive_msg(std::string &msg)
     if (length == 0)
         return length;
 
-    auto json = new char[length];
+    std::vector<char> json(length);
     
-    std::cin.read(json, length);
-    std::string json_str(json);
+    std::cin.read(json.data(), length);
+    std::string json_str(json.data());
     //костыль, который дает гарантию, что строка будет заданного размера.
     //по каким-то причинам, периодчисеки в json записывается больше, чем length
     json_str.replace(length, json_str.length(), "");
     msg = json_str;
-    delete[] json;
 
     return length;
 }
@@ -184,7 +220,7 @@ void receive_send()
         if (!length)
             break;
 
-        //msg_json = "{\"text\":\"/Users/developer/Documents/GitHub/FileExtention/application/..\"}";
+        //msg_json = "{\"text\":\"/Users/developer/Documents/test.txt\"}";
 
         ++msg_numb;
 
