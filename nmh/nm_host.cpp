@@ -12,34 +12,38 @@ using json = nlohmann::json;
 size_t get_length()
 {
     size_t length = 0;
-    //auto f_log = std::ofstream("log.txt", std::ofstream::app);
     for (size_t i = 0; i < 4; ++i)
     {
         auto buf = getchar();
         if (buf < 0)
             return 0;
 
-        //f_log << "char: " << buf << std::endl;
         length = length | (buf << i * 8);
     }
 
     return length;
 }
 
-std::ifstream::pos_type get_file_size(const std::string &path)
+inline std::ifstream::pos_type get_file_size(const std::string &path)
 {
     std::ifstream in(path, std::ifstream::ate | std::ifstream::binary);
 
     return in.tellg();
 }
 
+inline std::string get_parent_dir(const std::string &path)
+{
+    auto parent = path;
+    while(parent.back() != '/')
+        parent.pop_back();
+    return parent;
+}
+
 std::string get_message(const std::string &path, const size_t &size)
 {
     json msg;
     json t;
-    auto parent = path;
-    while(parent.back() != '/')
-        parent.pop_back();
+    auto parent = get_parent_dir(path);
 
     if(size > 1024)
     {
@@ -89,7 +93,7 @@ std::string get_message(json &msg, const std::string &name, const std::string va
     return msg.dump();
 }
 
-std::string proc_path(const std::string &path)
+inline std::string proc_path(const std::string &path)
 {
     auto full_path = realpath(path.c_str(), NULL);
 
@@ -100,7 +104,7 @@ std::string proc_path(const std::string &path)
 
 inline bool is_hidden(std::string name)
 {
-    return ((name.length() >=2 && name[1] != '.' && name[0] == '.') || (name.length() == 1 && name[0] == '.'));
+    return name[0] == '.';
 }
 
 std::string get_folders_contains_message(const std::string &path_)
@@ -110,10 +114,12 @@ std::string get_folders_contains_message(const std::string &path_)
     DIR *pdir = NULL;
     pdir = opendir(path.c_str());
     struct dirent *pent = NULL;
-    
+    auto parent = get_parent_dir(path);
     json msg;
     json t;
     t["path"] = path;
+    t["parent"] = parent;
+
     msg.push_back(t);
     
     pent = readdir(pdir);

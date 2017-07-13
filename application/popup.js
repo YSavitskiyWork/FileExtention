@@ -1,22 +1,17 @@
-var timeout = setTimeout(function() {}, 100);
-
 function appendMessage(msg_json)
 {
-    // document.getElementById('size').innerHTML += text;
-    // console.log(text)
-    // var path = document.getElementById('path').value;
     var tbdy = document.getElementById("size_tb");
     tbdy.innerHTML = "";
     var tr = null;
-    let i = 0;
+    let ind = 0;
     JSON.parse(msg_json, function(name, value)
     {
       if(name == "parent")
       {
         tr = document.createElement('tr');
-        tr.id = "size_tr_" + i;
+        tr.id = "size_tr_" + ind;
+        ind += 1;
         tr.addEventListener('click', openFile);
-        i += 1;
         var td = document.createElement('td');
         td.appendChild(document.createTextNode("back"));
         td.className = "mdl-data-table__cell--non-numeric";
@@ -27,8 +22,8 @@ function appendMessage(msg_json)
       if(name == "file")
       {
         tr = document.createElement('tr');
-        tr.id = "size_tr_" + i;
-        i += 1;
+        tr.id = "size_tr_" + ind;
+        ind += 1;
         var td = document.createElement('td');
         var pre = document.createElement('pre');
         pre.appendChild(document.createTextNode(value));
@@ -45,15 +40,13 @@ function appendMessage(msg_json)
       if(name.includes("text"))
       {
         tr = document.createElement('tr');
-        tr.id = "size_tr_" + i;
+        tr.id = "size_tr_" + ind;
+        ind += 1;
         tr.addEventListener('click', openFile);
-        i += 1;
         var td = document.createElement('td');
         td.appendChild(document.createTextNode(value));
         td.className = "mdl-data-table__cell--non-numeric";
         tr.appendChild(td);
-        
-        //document.getElementById('size').innerHTML += "<tr><td class=\"mdl-list__item\">" + value + "</td>";
       }
 
       if (name.includes("value"))
@@ -62,7 +55,6 @@ function appendMessage(msg_json)
         td.appendChild(document.createTextNode(value));
         td.className = "mdl-data-table__cell--non-numeric";
         tr.appendChild(td);
-        //document.getElementById('size').innerHTML += "<td class=\"mdl-list__item\">" + value + "</td></tr>";
         tbdy.appendChild(tr);
       }            
     });
@@ -78,7 +70,7 @@ function openFile(event)
       {
         tr_id = event.target.parentElement.id;
       }
-      else
+      else if(event.target.tagName.toLowerCase() == 'tr')
         {
           tr_id = event.target.id;
         }
@@ -136,8 +128,9 @@ function connect()
 function documentEvents() 
 {    
   document.getElementById('path').addEventListener('change', sendNativeMessage);
-
 };
+
+var timeout = null;
 
 var port = null;
 
