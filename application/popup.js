@@ -1,3 +1,5 @@
+var timeout = setTimeout(function() {}, 100);
+
 function appendMessage(msg_json)
 {
     // document.getElementById('size').innerHTML += text;
@@ -28,7 +30,9 @@ function appendMessage(msg_json)
         tr.id = "size_tr_" + i;
         i += 1;
         var td = document.createElement('td');
-        td.appendChild(document.createTextNode(value));
+        var pre = document.createElement('pre');
+        pre.appendChild(document.createTextNode(value));
+        td.appendChild(pre);
         td.className = "mdl-data-table__cell--non-numeric";
         tr.appendChild(td);
         tbdy.appendChild(tr);
@@ -66,36 +70,40 @@ function appendMessage(msg_json)
 
 function openFile(event)
 {
-    var tr_id = null;
-    if(event.target.tagName.toLowerCase() == 'td')
+    clearTimeout(timeout);
+    timeout = setTimeout(function()
     {
-      tr_id = event.target.parentElement.id;
-    }
-    else
+      var tr_id = null;
+      if(event.target.tagName.toLowerCase() == 'td')
       {
-        tr_id = event.target.id;
+        tr_id = event.target.parentElement.id;
       }
-    var el = document.getElementById(tr_id);
-    var attr = el.cells[0].textContent;
-    
-    if(attr == "back")
-    {
-      var path = document.getElementById("path").value;
-      var arr = path.split("/");
-      path = "";
-      for(let i = 0; i<arr.length-1; i+=1)
+      else
+        {
+          tr_id = event.target.id;
+        }
+      var el = document.getElementById(tr_id);
+      var attr = el.cells[0].textContent;
+      
+      if(attr == "back")
       {
-        path +="/" + arr[i];
+        var path = document.getElementById("path").value;
+        var arr = path.split("/");
+        path = "";
+        for(let i = 0; i<arr.length-1; i+=1)
+        {
+          path +="/" + arr[i];
+        }
+        document.getElementById("path").value = path;
       }
-      document.getElementById("path").value = path;
-    }
-    else
-    {
-      var value = el.cells[1].textContent;
-      document.getElementById("path").value += "/" + attr;
-    }
+      else
+      {
+        var value = el.cells[1].textContent;
+        document.getElementById("path").value += "/" + attr;
+      }
 
-    sendNativeMessage();
+      sendNativeMessage();
+    }, 100);
 }
 
 function sendNativeMessage() 
