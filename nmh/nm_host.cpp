@@ -220,8 +220,10 @@ void receive_send()
         size_t length = receive_msg(msg_json);
 
         if (f_log)
+        {
             f_log << "length : " << length << std::endl;
             f_log << "input : " << msg_json << std::endl;
+        };
 
         if (!length)
             break;
