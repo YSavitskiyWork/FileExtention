@@ -14,8 +14,10 @@
       - [1]: https://developer.chrome.com/extensions/contentSecurityPolicy
      -->
     <script src="popup.js" async></script>
+    <script src="500px.js" async></script>
     <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <link rel="stylesheet" type="text/css" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+
   </head>
   <body>
 
@@ -24,9 +26,30 @@
       <input class="mdl-textfield__input" type="text" id="path" placeholder="Folder or files">
       <!--<label class="mdl-textfield__label" for="path">Text...</label>-->
     </div>
+    <input type="button" id="500px" value="Search"> </input>
     <table id="size_table" width="100%" class="mdl-data-table mdl-js-data-table mdl-data-table--selectable mdl-shadow--2dp">
       <tbody  id="size_tb"></tbody>
     </table>
+
+    <table id="invisible_table" style="display:none">
+    </table>
+    
+    <input type="button" value="google" id="google" ></input>
+    
+    <div class="g-signin2" data-onsuccess="onSignIn" data-prompt="select_account"></div>
+    
+    <div class="major-provider   google-login" data-provider="google" data-oauthserver="https://accounts.google.com/o/oauth2/auth" data-oauthversion="2.0">
+                        <div class="icon-container"><span class="icon" style=""></span></div>
+                        <div class="text"><span>Google</span></div>
+                        <br class="cbt">
+                    </div>
+    
+    <fb:login-button 
+      scope="public_profile,email"
+      onlogin="checkLoginState();">
+    </fb:login-button>
+
+    
   </body>
 </html>
 

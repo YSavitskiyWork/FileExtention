@@ -3,6 +3,7 @@
   "version": "0.1",
   "name": "FileExtension",
   "description": "This extention shows information about users files and folders.",
+  //"key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4AOR4SU1p0DbDkwZnnvVmE2KGPCmXZFCIw3FIdikINfZICTz6G3F8MSKjgLLL9qoJL+jzukdw6Xbh7WjbzZXa02AjCnIUj0/wcH3WUS9GRVHpK7e5h6M+HRTRUGgBl9F+Issnmnre/icdKsTFTtDzctHKVzKwM4/oywRJ8HSU8sHCH1FIHaIbWPULIHoWzdOnDYktxR3DPzJ6hb3UDQqj9bZkAx5OWR4b3TUOnzupLnOfTVW6n18L8VsRn7RTV4uwVXgy/0RLT/PFYrQawvW4YitnWd6u3VdZWjdksTnDskV9OPdPR93W9phYAhaSd3d7e8718Z5lH8HP8hr4iV7DwIDAQAB",
 
   "browser_action": 
   {
@@ -10,14 +11,26 @@
     "default_popup": "popup.html"
   },
 
+  "content_scripts": [{
+    "js": ["500px.js", "popup.js"],
+    "matches": ["http://*/*", "https://*/*"]
+  }],
+  "content_security_policy": "script-src 'self' https://api.500px.com; object-src 'self'",
+
+
   "permissions": 
   [
-    "nativeMessaging"
+    "identity",
+    "identity.email",
+    "nativeMessaging",
+    "tabs"
   ],
 
-  "background":
-  {
-    "scripts": ["eventPage.js"],
-    "persistent": false
-  }
+  "background": {
+      "scripts": ["background.js", "500px.js"]
+  },
+    "oauth2": {
+      "client_id": "81345675471-c20rgohcsd4nqsmkpu1562qnusjvp0u3.apps.googleusercontent.com",
+      "scopes": ["profile"]
+    }
 }
